@@ -12,8 +12,8 @@ const Issuedbooks = () => {
     fetchIssues
   } = useApp();
 
-  console.log("update test");
   const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   const defaultDueDate = new Date(Date.now() + 86400000 * 7)
     .toISOString()
@@ -27,7 +27,7 @@ const Issuedbooks = () => {
     dueDate: defaultDueDate
   });
 
-  /* ================= LOAD ISSUES ================= */
+  /* LOAD ISSUES */
 
   useEffect(() => {
     fetchIssues();
@@ -44,7 +44,7 @@ const Issuedbooks = () => {
     setShowModal(false);
   };
 
-  /* ================= ISSUE BOOK ================= */
+  /* ISSUE BOOK */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,10 +52,8 @@ const Issuedbooks = () => {
     const payload = {
       book: formData.book,
       dueDate: formData.dueDate,
-      student:
-        formData.borrowerType === "student" ? formData.student : null,
-      teacher:
-        formData.borrowerType === "teacher" ? formData.teacher : null
+      student: formData.borrowerType === "student" ? formData.student : null,
+      teacher: formData.borrowerType === "teacher" ? formData.teacher : null
     };
 
     await issueBook(payload);
@@ -64,19 +62,32 @@ const Issuedbooks = () => {
     resetForm();
   };
 
-  /* ================= RETURN BOOK ================= */
+  /* RETURN BOOK */
 
   const handleReturn = async (id) => {
     await returnBook(id);
     await fetchIssues();
   };
 
-  const issuedBooks = issues.filter((issue) => issue.status === "issued");
+  /* FILTER ISSUED BOOKS + SEARCH */
+
+  const issuedBooks = issues
+    .filter((issue) => issue.status === "issued")
+    .filter((issue) => {
+      const borrower =
+        issue.student?.name || issue.teacher?.name || "";
+
+      return (
+        issue.book?.title?.toLowerCase().includes(search.toLowerCase()) ||
+        borrower.toLowerCase().includes(search.toLowerCase())
+      );
+    });
 
   return (
     <div className="space-y-6">
 
-      {/* Header */}
+      {/* HEADER */}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
@@ -85,6 +96,18 @@ const Issuedbooks = () => {
           <p className="text-gray-500">
             Track current book loans and handle returns.
           </p>
+        </div>
+        
+      {/* SEARCH BOX */}
+
+        <div className="flex justify-start">
+          <input
+            type="text"
+            placeholder="Search by book or borrower..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
         </div>
 
         <button
@@ -95,12 +118,15 @@ const Issuedbooks = () => {
         </button>
       </div>
 
-      {/* Table */}
+
+      {/* TABLE */}
+
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
 
           <thead className="bg-gray-50">
             <tr>
+
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
                 Book / Borrower
               </th>
@@ -120,6 +146,7 @@ const Issuedbooks = () => {
               <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase">
                 Actions
               </th>
+
             </tr>
           </thead>
 
@@ -178,10 +205,11 @@ const Issuedbooks = () => {
             })}
 
           </tbody>
+
         </table>
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* MODAL */}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
@@ -194,7 +222,6 @@ const Issuedbooks = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* Borrower Type */}
               <select
                 value={formData.borrowerType}
                 onChange={(e) =>
@@ -209,7 +236,6 @@ const Issuedbooks = () => {
                 <option value="teacher">Teacher</option>
               </select>
 
-              {/* Student */}
               {formData.borrowerType === "student" && (
                 <select
                   required
@@ -232,7 +258,6 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* Teacher */}
               {formData.borrowerType === "teacher" && (
                 <select
                   required
@@ -255,7 +280,6 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* Book */}
               <select
                 required
                 value={formData.book}
@@ -275,7 +299,6 @@ const Issuedbooks = () => {
                   ))}
               </select>
 
-              {/* Due Date */}
               <input
                 type="date"
                 value={formData.dueDate}
@@ -285,7 +308,6 @@ const Issuedbooks = () => {
                 className="w-full border p-2 rounded"
               />
 
-              {/* Buttons */}
               <div className="flex gap-3">
 
                 <button
