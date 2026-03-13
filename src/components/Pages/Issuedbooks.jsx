@@ -14,6 +14,7 @@ const Issuedbooks = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
+  const [bookSearch, setBookSearch] = useState("");
 
   const defaultDueDate = new Date(Date.now() + 86400000 * 7)
     .toISOString()
@@ -41,6 +42,7 @@ const Issuedbooks = () => {
       book: "",
       dueDate: defaultDueDate
     });
+    setBookSearch("");
     setShowModal(false);
   };
 
@@ -69,7 +71,7 @@ const Issuedbooks = () => {
     await fetchIssues();
   };
 
-  /* FILTER ISSUED BOOKS + SEARCH */
+  /* FILTER ISSUED BOOKS */
 
   const issuedBooks = issues
     .filter((issue) => issue.status === "issued")
@@ -83,12 +85,21 @@ const Issuedbooks = () => {
       );
     });
 
+  /* FILTER BOOKS FOR SEARCHABLE DROPDOWN */
+
+  const filteredBooks = books
+    .filter((b) => b.quantity > 0)
+    .filter((b) =>
+      b.title.toLowerCase().includes(bookSearch.toLowerCase())
+    );
+
   return (
     <div className="space-y-6">
 
       {/* HEADER */}
 
       <div className="flex justify-between items-center">
+
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
             Issued Books
@@ -97,18 +108,15 @@ const Issuedbooks = () => {
             Track current book loans and handle returns.
           </p>
         </div>
-        
-      {/* SEARCH BOX */}
 
-        <div className="flex justify-start">
-          <input
-            type="text"
-            placeholder="Search by book or borrower..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
+        {/* SEARCH BOX */}
+        <input
+          type="text"
+          placeholder="Search by book or borrower..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
 
         <button
           onClick={() => setShowModal(true)}
@@ -116,8 +124,8 @@ const Issuedbooks = () => {
         >
           Issue a Book
         </button>
-      </div>
 
+      </div>
 
       {/* TABLE */}
 
@@ -280,6 +288,16 @@ const Issuedbooks = () => {
                 </select>
               )}
 
+              {/* SEARCH BOOK */}
+              <input
+                type="text"
+                placeholder="Search Book..."
+                value={bookSearch}
+                onChange={(e) => setBookSearch(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              {/* SELECT BOOK */}
               <select
                 required
                 value={formData.book}
@@ -290,13 +308,11 @@ const Issuedbooks = () => {
               >
                 <option value="">Select Book</option>
 
-                {books
-                  .filter((b) => b.quantity > 0)
-                  .map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.title} ({b.quantity} left)
-                    </option>
-                  ))}
+                {filteredBooks.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.title} ({b.quantity} left)
+                  </option>
+                ))}
               </select>
 
               <input
