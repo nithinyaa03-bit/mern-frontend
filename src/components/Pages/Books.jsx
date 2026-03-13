@@ -7,6 +7,8 @@ const Books = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -14,6 +16,14 @@ const Books = () => {
     category: "",
     quantity: 1,
   });
+
+  // ================= FILTER BOOKS =================
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.isbn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // ================= HANDLE SUBMIT =================
   const handleSubmit = async (e) => {
@@ -50,13 +60,10 @@ const Books = () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this book?"
     );
+
     if (!confirmDelete) return;
 
-    try {
-      await deleteBook(id);
-    } catch (error) {
-      console.error("Delete error:", error);
-    }
+    await deleteBook(id);
   };
 
   // ================= RESET FORM =================
@@ -68,13 +75,15 @@ const Books = () => {
       category: "",
       quantity: 1,
     });
+
     setEditingBook(null);
     setShowModal(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
@@ -87,122 +96,132 @@ const Books = () => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg transition"
+          className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg"
         >
           Add New Book
         </button>
       </div>
 
-      {/* ================= TABLE ================= */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* SEARCH BOX */}
+      <div className="flex justify-end">
+        <input
+          type="text"
+          placeholder="Search books..."
+          className="border px-4 py-2 rounded-lg w-72"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
+
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
                 Title / Author
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
                 ISBN
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">
+
+              <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
                 Category
               </th>
-              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">
+
+              <th className="px-6 py-4 text-center text-xs font-semibold uppercase">
                 Qty
               </th>
-              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">
+
+              <th className="px-6 py-4 text-center text-xs font-semibold uppercase">
                 Avail
               </th>
-              <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">
+
+              <th className="px-6 py-4 text-center text-xs font-semibold uppercase">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100">
-            {books.length === 0 ? (
+          <tbody className="divide-y">
+
+            {filteredBooks.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center py-6 text-gray-400">
-                  No books available
+                  No books found
                 </td>
               </tr>
             ) : (
-              books.map((book) => (
-                <tr key={book._id} className="hover:bg-gray-50 transition">
+              filteredBooks.map((book) => (
+                <tr key={book._id}>
+
                   <td className="px-6 py-4">
-                    <div className="font-bold text-gray-800">
-                      {book.title}
-                    </div>
+                    <div className="font-bold">{book.title}</div>
                     <div className="text-sm text-gray-500">
                       {book.author}
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {book.isbn}
-                  </td>
+                  <td className="px-6 py-4">{book.isbn}</td>
 
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
+                    <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs">
                       {book.category}
                     </span>
                   </td>
 
-                  <td className="px-6 py-4 text-center text-sm font-medium">
+                  <td className="px-6 py-4 text-center">
                     {book.quantity}
                   </td>
 
-                  <td className="px-6 py-4 text-center">
-                    <span
-                      className={`text-sm font-bold ${
-                        book.available > 0
-                          ? "text-emerald-600"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {book.available}
-                    </span>
+                  <td className="px-6 py-4 text-center font-bold">
+                    {book.available}
                   </td>
 
-                  {/* ===== Updated Action Buttons ===== */}
                   <td className="px-6 py-4 text-center space-x-2">
+
                     <button
                       onClick={() => handleEdit(book)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm transition"
+                      className="bg-blue-500 text-white px-3 py-1 rounded"
                     >
                       Update
                     </button>
 
                     <button
                       onClick={() => handleDelete(book._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm transition"
+                      className="bg-red-500 text-white px-3 py-1 rounded"
                     >
                       Delete
                     </button>
+
                   </td>
+
                 </tr>
               ))
             )}
+
           </tbody>
         </table>
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
-            <div className="p-6 bg-amber-600 text-white flex justify-between items-center rounded-t-2xl">
-              <h3 className="text-xl font-bold">
-                {editingBook ? "Edit Book" : "Add New Book"}
-              </h3>
-              <button onClick={resetForm}>✖</button>
-            </div>
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="bg-white p-6 rounded-xl w-96">
+
+            <h3 className="text-xl font-bold mb-4">
+              {editingBook ? "Edit Book" : "Add New Book"}
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+
               <input
                 required
-                placeholder="Book Title"
-                className="w-full px-3 py-2 border rounded-lg"
+                placeholder="Title"
+                className="w-full border p-2 rounded"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
@@ -212,41 +231,38 @@ const Books = () => {
               <input
                 required
                 placeholder="Author"
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full border p-2 rounded"
                 value={formData.author}
                 onChange={(e) =>
                   setFormData({ ...formData, author: e.target.value })
                 }
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  required
-                  placeholder="ISBN"
-                  className="px-3 py-2 border rounded-lg"
-                  value={formData.isbn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isbn: e.target.value })
-                  }
-                />
+              <input
+                required
+                placeholder="ISBN"
+                className="w-full border p-2 rounded"
+                value={formData.isbn}
+                onChange={(e) =>
+                  setFormData({ ...formData, isbn: e.target.value })
+                }
+              />
 
-                <input
-                  required
-                  placeholder="Category"
-                  className="px-3 py-2 border rounded-lg"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                />
-              </div>
+              <input
+                required
+                placeholder="Category"
+                className="w-full border p-2 rounded"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+              />
 
               <input
                 type="number"
                 min="1"
                 required
-                placeholder="Quantity"
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full border p-2 rounded"
                 value={formData.quantity}
                 onChange={(e) =>
                   setFormData({
@@ -258,7 +274,7 @@ const Books = () => {
 
               <button
                 type="submit"
-                className="w-full bg-amber-600 text-white font-bold py-3 rounded-xl hover:bg-amber-700 transition"
+                className="w-full bg-amber-600 text-white py-2 rounded"
               >
                 {editingBook ? "Update Book" : "Save Book"}
               </button>
@@ -266,12 +282,15 @@ const Books = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="w-full bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl"
+                className="w-full bg-gray-200 py-2 rounded"
               >
                 Cancel
               </button>
+
             </form>
+
           </div>
+
         </div>
       )}
     </div>
