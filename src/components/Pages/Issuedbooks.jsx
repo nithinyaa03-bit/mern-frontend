@@ -14,7 +14,6 @@ const Issuedbooks = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
-  const [bookSearch, setBookSearch] = useState("");
 
   const defaultDueDate = new Date(Date.now() + 86400000 * 7)
     .toISOString()
@@ -43,7 +42,6 @@ const Issuedbooks = () => {
       dueDate: defaultDueDate
     });
 
-    setBookSearch("");
     setShowModal(false);
   };
 
@@ -85,15 +83,6 @@ const Issuedbooks = () => {
         borrower.toLowerCase().includes(search.toLowerCase())
       );
     });
-
-  /* FILTER BOOKS FOR SEARCHABLE SELECT */
-
-  const filteredBooks = books.filter((book) => {
-    const title = book.title?.toLowerCase() || "";
-    const searchText = bookSearch.toLowerCase();
-
-    return book.quantity > 0 && title.includes(searchText);
-  });
 
   return (
     <div className="space-y-6">
@@ -291,34 +280,37 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* BOOK SEARCH */}
+              {/* TYPE BOOK NAME */}
 
               <input
-                type="text"
-                placeholder="Search book title..."
-                value={bookSearch}
-                onChange={(e) => setBookSearch(e.target.value)}
+                list="bookList"
+                placeholder="Type book name..."
                 className="w-full border p-2 rounded"
+                onChange={(e) => {
+                  const selectedBook = books.find(
+                    (b) =>
+                      b.title.toLowerCase() ===
+                      e.target.value.toLowerCase()
+                  );
+
+                  if (selectedBook) {
+                    setFormData({
+                      ...formData,
+                      book: selectedBook._id
+                    });
+                  }
+                }}
               />
 
-              {/* BOOK SELECT */}
-
-              <select
-                required
-                value={formData.book}
-                onChange={(e) =>
-                  setFormData({ ...formData, book: e.target.value })
-                }
-                className="w-full border p-2 rounded"
-              >
-                <option value="">Select Book</option>
-
-                {filteredBooks.map((b) => (
-                  <option key={b._id} value={b._id}>
-                    {b.title} ({b.quantity} left)
-                  </option>
-                ))}
-              </select>
+              <datalist id="bookList">
+                {books
+                  .filter((b) => b.quantity > 0)
+                  .map((b) => (
+                    <option key={b._id} value={b.title}>
+                      {b.title} ({b.quantity} left)
+                    </option>
+                  ))}
+              </datalist>
 
               <input
                 type="date"
