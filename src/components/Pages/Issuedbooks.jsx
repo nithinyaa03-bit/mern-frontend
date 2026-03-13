@@ -55,7 +55,6 @@ const Issuedbooks = () => {
 
     await issueBook(payload);
     await fetchIssues();
-
     resetForm();
   };
 
@@ -76,7 +75,7 @@ const Issuedbooks = () => {
       );
     });
 
-  /* BOOK OPTIONS FOR SEARCHABLE DROPDOWN */
+  /* SEARCHABLE BOOK OPTIONS */
 
   const bookOptions = books
     .filter((b) => b.quantity > 0)
@@ -101,15 +100,13 @@ const Issuedbooks = () => {
           </p>
         </div>
 
-        <div>
-          <input
-            type="text"
-            placeholder="Search by book or borrower..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search by book or borrower..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
 
         <button
           onClick={() => setShowModal(true)}
@@ -217,7 +214,7 @@ const Issuedbooks = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
 
-          <div className="bg-white rounded-xl p-6 w-96">
+          <div className="bg-white rounded-xl p-6 w-[420px]">
 
             <h3 className="text-xl font-bold mb-4">
               Issue New Book
@@ -283,10 +280,10 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* SEARCHABLE BOOK DROPDOWN */}
+              {/* SEARCHABLE BOOK SELECT */}
 
               <Select
-                placeholder="Search or select book..."
+                placeholder="Search Book..."
                 options={bookOptions}
                 onChange={(selected) =>
                   setFormData({ ...formData, book: selected.value })
