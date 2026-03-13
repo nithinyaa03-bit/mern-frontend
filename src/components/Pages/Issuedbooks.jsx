@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import { useApp } from "../store.jsx";
 
 const Issuedbooks = () => {
@@ -27,8 +28,6 @@ const Issuedbooks = () => {
     dueDate: defaultDueDate
   });
 
-  /* LOAD ISSUES */
-
   useEffect(() => {
     fetchIssues();
   }, []);
@@ -43,8 +42,6 @@ const Issuedbooks = () => {
     });
     setShowModal(false);
   };
-
-  /* ISSUE BOOK */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,14 +59,10 @@ const Issuedbooks = () => {
     resetForm();
   };
 
-  /* RETURN BOOK */
-
   const handleReturn = async (id) => {
     await returnBook(id);
     await fetchIssues();
   };
-
-  /* FILTER ISSUED BOOKS + SEARCH */
 
   const issuedBooks = issues
     .filter((issue) => issue.status === "issued")
@@ -83,12 +76,22 @@ const Issuedbooks = () => {
       );
     });
 
+  /* BOOK OPTIONS FOR SEARCHABLE DROPDOWN */
+
+  const bookOptions = books
+    .filter((b) => b.quantity > 0)
+    .map((b) => ({
+      value: b._id,
+      label: `${b.title} (${b.quantity} left)`
+    }));
+
   return (
     <div className="space-y-6">
 
       {/* HEADER */}
 
       <div className="flex justify-between items-center">
+
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
             Issued Books
@@ -97,10 +100,8 @@ const Issuedbooks = () => {
             Track current book loans and handle returns.
           </p>
         </div>
-        
-      {/* SEARCH BOX */}
 
-        <div className="flex justify-start">
+        <div>
           <input
             type="text"
             placeholder="Search by book or borrower..."
@@ -116,12 +117,13 @@ const Issuedbooks = () => {
         >
           Issue a Book
         </button>
-      </div>
 
+      </div>
 
       {/* TABLE */}
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+
         <table className="min-w-full divide-y divide-gray-200">
 
           <thead className="bg-gray-50">
@@ -207,6 +209,7 @@ const Issuedbooks = () => {
           </tbody>
 
         </table>
+
       </div>
 
       {/* MODAL */}
@@ -280,24 +283,15 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              <select
-                required
-                value={formData.book}
-                onChange={(e) =>
-                  setFormData({ ...formData, book: e.target.value })
-                }
-                className="w-full border p-2 rounded"
-              >
-                <option value="">Select Book</option>
+              {/* SEARCHABLE BOOK DROPDOWN */}
 
-                {books
-                  .filter((b) => b.quantity > 0)
-                  .map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.title} ({b.quantity} left)
-                    </option>
-                  ))}
-              </select>
+              <Select
+                placeholder="Search or select book..."
+                options={bookOptions}
+                onChange={(selected) =>
+                  setFormData({ ...formData, book: selected.value })
+                }
+              />
 
               <input
                 type="date"
