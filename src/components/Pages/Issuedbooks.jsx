@@ -42,6 +42,7 @@ const Issuedbooks = () => {
       book: "",
       dueDate: defaultDueDate
     });
+
     setBookSearch("");
     setShowModal(false);
   };
@@ -85,13 +86,14 @@ const Issuedbooks = () => {
       );
     });
 
-  /* FILTER BOOKS FOR SEARCHABLE DROPDOWN */
+  /* FILTER BOOKS FOR SEARCHABLE SELECT */
 
-  const filteredBooks = books
-    .filter((b) => b.quantity > 0)
-    .filter((b) =>
-      b.title.toLowerCase().includes(bookSearch.toLowerCase())
-    );
+  const filteredBooks = books.filter((book) => {
+    const title = book.title?.toLowerCase() || "";
+    const searchText = bookSearch.toLowerCase();
+
+    return book.quantity > 0 && title.includes(searchText);
+  });
 
   return (
     <div className="space-y-6">
@@ -104,12 +106,12 @@ const Issuedbooks = () => {
           <h1 className="text-3xl font-bold text-gray-800">
             Issued Books
           </h1>
+
           <p className="text-gray-500">
             Track current book loans and handle returns.
           </p>
         </div>
 
-        {/* SEARCH BOX */}
         <input
           type="text"
           placeholder="Search by book or borrower..."
@@ -180,6 +182,7 @@ const Issuedbooks = () => {
                     <div className="font-bold">
                       {issue.book?.title}
                     </div>
+
                     <div className="text-sm text-indigo-600">
                       {borrower}
                     </div>
@@ -195,7 +198,7 @@ const Issuedbooks = () => {
 
                   <td className="px-6 py-4 text-center">
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">
-                      issued
+                      Issued
                     </span>
                   </td>
 
@@ -217,7 +220,7 @@ const Issuedbooks = () => {
         </table>
       </div>
 
-      {/* MODAL */}
+      {/* ISSUE BOOK MODAL */}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
@@ -288,16 +291,18 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* SEARCH BOOK */}
+              {/* BOOK SEARCH */}
+
               <input
                 type="text"
-                placeholder="Search Book..."
+                placeholder="Search book title..."
                 value={bookSearch}
                 onChange={(e) => setBookSearch(e.target.value)}
                 className="w-full border p-2 rounded"
               />
 
-              {/* SELECT BOOK */}
+              {/* BOOK SELECT */}
+
               <select
                 required
                 value={formData.book}
