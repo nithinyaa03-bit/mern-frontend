@@ -41,7 +41,6 @@ const Issuedbooks = () => {
       book: "",
       dueDate: defaultDueDate
     });
-
     setShowModal(false);
   };
 
@@ -70,7 +69,7 @@ const Issuedbooks = () => {
     await fetchIssues();
   };
 
-  /* FILTER ISSUED BOOKS */
+  /* FILTER ISSUED BOOKS + SEARCH */
 
   const issuedBooks = issues
     .filter((issue) => issue.status === "issued")
@@ -90,24 +89,26 @@ const Issuedbooks = () => {
       {/* HEADER */}
 
       <div className="flex justify-between items-center">
-
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
             Issued Books
           </h1>
-
           <p className="text-gray-500">
             Track current book loans and handle returns.
           </p>
         </div>
+        
+      {/* SEARCH BOX */}
 
-        <input
-          type="text"
-          placeholder="Search by book or borrower..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
-        />
+        <div className="flex justify-start">
+          <input
+            type="text"
+            placeholder="Search by book or borrower..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-4 py-2 rounded-lg w-72 focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
 
         <button
           onClick={() => setShowModal(true)}
@@ -115,8 +116,8 @@ const Issuedbooks = () => {
         >
           Issue a Book
         </button>
-
       </div>
+
 
       {/* TABLE */}
 
@@ -171,7 +172,6 @@ const Issuedbooks = () => {
                     <div className="font-bold">
                       {issue.book?.title}
                     </div>
-
                     <div className="text-sm text-indigo-600">
                       {borrower}
                     </div>
@@ -187,7 +187,7 @@ const Issuedbooks = () => {
 
                   <td className="px-6 py-4 text-center">
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700">
-                      Issued
+                      issued
                     </span>
                   </td>
 
@@ -209,7 +209,7 @@ const Issuedbooks = () => {
         </table>
       </div>
 
-      {/* ISSUE BOOK MODAL */}
+      {/* MODAL */}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
@@ -280,37 +280,24 @@ const Issuedbooks = () => {
                 </select>
               )}
 
-              {/* TYPE BOOK NAME */}
-
-              <input
-                list="bookList"
-                placeholder="Type book name..."
+              <select
+                required
+                value={formData.book}
+                onChange={(e) =>
+                  setFormData({ ...formData, book: e.target.value })
+                }
                 className="w-full border p-2 rounded"
-                onChange={(e) => {
-                  const selectedBook = books.find(
-                    (b) =>
-                      b.title.toLowerCase() ===
-                      e.target.value.toLowerCase()
-                  );
+              >
+                <option value="">Select Book</option>
 
-                  if (selectedBook) {
-                    setFormData({
-                      ...formData,
-                      book: selectedBook._id
-                    });
-                  }
-                }}
-              />
-
-              <datalist id="bookList">
                 {books
                   .filter((b) => b.quantity > 0)
                   .map((b) => (
-                    <option key={b._id} value={b.title}>
+                    <option key={b._id} value={b._id}>
                       {b.title} ({b.quantity} left)
                     </option>
                   ))}
-              </datalist>
+              </select>
 
               <input
                 type="date"
