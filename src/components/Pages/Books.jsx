@@ -93,6 +93,16 @@ const Books = () => {
             Manage your library's collection.
           </p>
         </div>
+       {/* SEARCH BOX */}
+       <div className="flex justify-end">
+         <input
+          type="text"
+          placeholder="Search books..."
+          className="border px-4 py-2 rounded-lg w-72"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+         />
+       </div>
 
         <button
           onClick={() => setShowModal(true)}
@@ -100,17 +110,6 @@ const Books = () => {
         >
           Add New Book
         </button>
-      </div>
-
-      {/* SEARCH BOX */}
-      <div className="flex justify-end">
-        <input
-          type="text"
-          placeholder="Search books..."
-          className="border px-4 py-2 rounded-lg w-72"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
       </div>
 
       {/* TABLE */}
